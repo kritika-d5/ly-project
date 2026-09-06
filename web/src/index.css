@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-stone-50);
+  color: var(--color-stone-900);
+}
+
+/* Judgment text reads as a document, not as UI. */
+.judgment-text {
+  font-family: var(--font-serif);
+  line-height: 1.75;
+}
+
+/* react-pdf needs these layers styled or text selection misaligns. */
+.react-pdf__Page__textContent,
+.react-pdf__Page__annotations {
+  display: none;
+}
+
+.react-pdf__Page__canvas {
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto !important;
+}

@@ -1,0 +1,28 @@
+{
+  "name": "legalplatform-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "probe": "tsx src/scripts/probe.ts"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^5.0.1",
+    "groq-sdk": "^0.9.0",
+    "mongodb": "^6.9.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  }
+}
