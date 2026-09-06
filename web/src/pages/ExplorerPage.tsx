@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getGraph } from '../api';
 import CitationGraph, { GraphLegend, type GraphLink, type GraphNode } from '../components/CitationGraph';
+import { useDocumentTitle } from '../useDocumentTitle';
 
 /**
  * The whole corpus as one picture: 198 judgments and the 336 citations between
@@ -12,9 +13,11 @@ import CitationGraph, { GraphLegend, type GraphLink, type GraphNode } from '../c
  */
 export default function ExplorerPage() {
   const navigate = useNavigate();
+  useDocumentTitle('Citation explorer');
   const { data, isLoading, error } = useQuery({ queryKey: ['graph'], queryFn: getGraph });
   const [tier, setTier] = useState<'all' | 'SC' | 'HC'>('all');
   const [onlyDisagreement, setOnlyDisagreement] = useState(false);
+  const [find, setFind] = useState('');
 
   const filtered = useMemo(() => {
     if (!data) return null;
@@ -28,6 +31,16 @@ export default function ExplorerPage() {
       ),
     };
   }, [data, tier]);
+
+  const query = find.trim().toLowerCase();
+  const spotlight = useMemo(() => {
+    if (!filtered || query.length < 2) return null;
+    return new Set(
+      filtered.nodes
+        .filter((n) => n.title.toLowerCase().includes(query) || n.label.toLowerCase().includes(query))
+        .map((n) => n.id),
+    );
+  }, [filtered, query]);
 
   const stats = useMemo(() => {
     if (!data) return null;
@@ -43,11 +56,12 @@ export default function ExplorerPage() {
       <h1 className="text-xl font-semibold tracking-tight text-stone-900">Citation explorer</h1>
       <p className="mt-1.5 max-w-2xl text-sm text-stone-600">
         Every judgment in the corpus and the citations between them. An arrow runs from the citing
-        case to the case it cites. Click any node to open it.
+        case to the case it cites. Click a node to inspect it, drag it out of the crowd to hold it
+        there, and double-click to open the judgment.
       </p>
 
       {isLoading && <p className="mt-8 text-sm text-stone-500">Loading the graph&hellip;</p>}
-      {error && <p className="mt-8 text-sm text-rose-700">{(error as Error).message}</p>}
+      {error && <p className="mt-8 text-sm text-vermilion-700">{(error as Error).message}</p>}
 
       {filtered && data && (
         <>
@@ -66,7 +80,7 @@ export default function ExplorerPage() {
                   onClick={() => setTier(v)}
                   className={`rounded-full border px-2.5 py-1 ${
                     tier === v
-                      ? 'border-stone-800 bg-stone-800 text-white'
+                      ? 'border-maroon-800 bg-maroon-800 text-white'
                       : 'border-stone-300 bg-white text-stone-600 hover:border-stone-400'
                   }`}
                 >
@@ -74,12 +88,39 @@ export default function ExplorerPage() {
                 </button>
               ))}
             </div>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <input
+                  value={find}
+                  onChange={(e) => setFind(e.target.value)}
+                  placeholder="Find a case in the graph"
+                  className="w-56 rounded-full border border-stone-300 bg-white px-3 py-1 text-xs
+                             outline-none focus:border-maroon-400 focus:ring-2 focus:ring-maroon-100"
+                />
+                {find && (
+                  <button
+                    onClick={() => setFind('')}
+                    aria-label="Clear"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400
+                               hover:text-maroon-700"
+                  >
+                    &times;
+                  </button>
+                )}
+              </div>
+              {spotlight && (
+                <span className={spotlight.size ? 'text-gold-700' : 'text-stone-400'}>
+                  {spotlight.size} match{spotlight.size === 1 ? '' : 'es'}
+                </span>
+              )}
+            </div>
+
             <label className="flex items-center gap-1.5 text-stone-600">
               <input
                 type="checkbox"
                 checked={onlyDisagreement}
                 onChange={(e) => setOnlyDisagreement(e.target.checked)}
-                className="accent-stone-800"
+                className="accent-maroon-700"
               />
               Highlight the {stats?.disagreements} disagreements
             </label>
@@ -95,7 +136,8 @@ export default function ExplorerPage() {
               height={560}
               labelMode="hubs"
               highlightDisagreement={onlyDisagreement}
-              onNodeClick={(n) => navigate(`/case/${n.id}`)}
+              spotlight={spotlight}
+              onNodeOpen={(n) => navigate(`/case/${n.id}`)}
             />
           </div>
 
@@ -114,8 +156,8 @@ export default function ExplorerPage() {
                     </span>
                     <button
                       onClick={() => navigate(`/case/${h.id}`)}
-                      className="text-left text-stone-700 underline decoration-stone-300
-                                 underline-offset-4 hover:decoration-stone-600"
+                      className="text-left text-stone-700 underline decoration-gold-300
+                                 underline-offset-4 hover:decoration-maroon-500"
                     >
                       {h.title}
                     </button>

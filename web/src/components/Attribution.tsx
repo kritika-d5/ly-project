@@ -20,8 +20,8 @@ export function KanoonCredit({ className = '' }: { className?: string }) {
       href={KANOON_URL}
       target="_blank"
       rel="noreferrer"
-      className={`font-medium text-stone-700 underline decoration-stone-300 underline-offset-4
-                  hover:decoration-stone-600 ${className}`}
+      className={`font-medium text-stone-700 underline decoration-gold-300 underline-offset-4
+                  hover:decoration-maroon-500 ${className}`}
     >
       Powered by IKanoon
     </a>

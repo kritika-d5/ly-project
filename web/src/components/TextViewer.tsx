@@ -19,7 +19,7 @@ export default function TextViewer({ tid }: { tid: number }) {
 
   if (isLoading) return <p className="text-sm text-stone-500">Loading judgment&hellip;</p>;
   if (error) {
-    return <p className="text-sm text-rose-700">{(error as Error).message}</p>;
+    return <p className="text-sm text-vermilion-700">{(error as Error).message}</p>;
   }
   if (!data) return null;
 
@@ -39,7 +39,7 @@ export default function TextViewer({ tid }: { tid: number }) {
             type="checkbox"
             checked={hideQuoted}
             onChange={(e) => setHideQuoted(e.target.checked)}
-            className="accent-stone-800"
+            className="accent-maroon-700"
           />
           Show only what this court wrote
         </label>

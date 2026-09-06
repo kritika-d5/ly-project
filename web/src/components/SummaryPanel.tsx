@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { getSummary } from '../api';
 import { ContentBadge } from './Badges';
+import Icon from './Icon';
 
 /**
  * Issue / Held / Principle, generated on demand rather than on page load —
@@ -15,20 +16,24 @@ export default function SummaryPanel({ tid }: { tid: number }) {
   if (!data && !isPending) {
     return (
       <div className="rounded-lg border border-stone-200 bg-white p-5">
-        <h3 className="text-sm font-medium text-stone-900">Generate a structured summary</h3>
+        <h3 className="flex items-center gap-2 text-sm font-medium text-stone-900">
+          <Icon name="summary" size={16} className="text-gold-500" />
+          Generate a structured summary
+        </h3>
         <p className="mt-1.5 text-sm text-stone-600">
           Issue, holding, and the principle the case is cited for &mdash; drawn only from the
           court&rsquo;s own words and the reporter&rsquo;s headnote, never from quoted material.
         </p>
         <button
           onClick={() => mutate()}
-          className="mt-4 rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white
-                     hover:bg-stone-700"
+          className="mt-4 flex items-center gap-2 rounded-md bg-maroon-800 px-4 py-2 text-sm
+                     font-medium text-white transition-colors hover:bg-maroon-700"
         >
+          <Icon name="summary" size={15} />
           Summarise
         </button>
         {error && (
-          <p className="mt-3 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+          <p className="mt-3 rounded-md border border-vermilion-200 bg-vermilion-50 p-3 text-sm text-vermilion-700">
             {(error as Error).message}
           </p>
         )}

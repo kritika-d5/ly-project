@@ -231,22 +231,22 @@ export const CONTENT_LABEL: Record<ContentType, { short: string; full: string; t
   court_text: {
     short: "Court's words",
     full: "The court's own words in this judgment",
-    tone: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    tone: 'bg-sage-50 text-sage-700 border-sage-200',
   },
   editorial: {
     short: 'SCR headnote',
     full: 'A summary written by law reporters, not by the court',
-    tone: 'bg-sky-50 text-sky-800 border-sky-200',
+    tone: 'bg-navy-50 text-navy-600 border-navy-200',
   },
   quoted_statute: {
     short: 'Statute text',
     full: 'The bare text of a statutory provision reproduced in the judgment',
-    tone: 'bg-amber-50 text-amber-900 border-amber-200',
+    tone: 'bg-gold-50 text-gold-700 border-gold-200',
   },
   quoted_case: {
     short: 'Quoted judgment',
     full: 'Quoted from another judgment — not this court speaking',
-    tone: 'bg-violet-50 text-violet-800 border-violet-200',
+    tone: 'bg-terracotta-100 text-terracotta-600 border-terracotta-200',
   },
   quoted_other: {
     short: 'Quoted source',
@@ -259,12 +259,12 @@ export const TIER_LABEL: Record<CourtTier, { short: string; full: string; tone: 
   SC: {
     short: 'Supreme Court',
     full: 'Supreme Court of India — binding on all courts',
-    tone: 'bg-slate-800 text-white border-slate-800',
+    tone: 'bg-stone-800 text-white border-stone-800',
   },
   HC: {
     short: 'High Court',
     full: 'High Court — persuasive, not binding the way a Supreme Court decision is',
-    tone: 'bg-white text-slate-700 border-slate-400',
+    tone: 'bg-white text-stone-700 border-stone-400',
   },
   OTHER: {
     short: 'Tribunal / other',

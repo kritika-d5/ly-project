@@ -8,7 +8,9 @@ import ChatPanel from '../components/ChatPanel';
 import EgoGraph from '../components/EgoGraph';
 import PdfViewer from '../components/PdfViewer';
 import SummaryPanel from '../components/SummaryPanel';
+import Icon, { type IconName } from '../components/Icon';
 import TextViewer from '../components/TextViewer';
+import { shortCaseTitle, useDocumentTitle } from '../useDocumentTitle';
 
 type Tab = 'document' | 'text' | 'citations' | 'summary' | 'chat';
 
@@ -21,10 +23,12 @@ export default function CasePage() {
   });
   const [tab, setTab] = useState<Tab>('document');
 
+  useDocumentTitle(data ? shortCaseTitle(data.title) : null);
+
   if (isLoading) return <p className="mx-auto max-w-6xl px-6 py-10 text-sm text-stone-500">Loading&hellip;</p>;
   if (error) {
     return (
-      <p className="mx-auto max-w-6xl px-6 py-10 text-sm text-rose-700">
+      <p className="mx-auto max-w-6xl px-6 py-10 text-sm text-vermilion-700">
         {(error as Error).message}
       </p>
     );
@@ -36,18 +40,25 @@ export default function CasePage() {
   // rather than showing an empty viewer.
   const effectiveTab: Tab = tab === 'document' && !data.hasPdf ? 'text' : tab;
 
-  const tabs: [Tab, string][] = [
-    ...(data.hasPdf ? ([['document', 'Official PDF']] as [Tab, string][]) : []),
-    ['text', 'Text'],
-    ['citations', 'Citation graph'],
-    ['summary', 'Summary'],
-    ['chat', 'Ask this case'],
+  const tabs: [Tab, string, IconName][] = [
+    ...(data.hasPdf
+      ? ([['document', 'Official PDF', 'document']] as [Tab, string, IconName][])
+      : []),
+    ['text', 'Text', 'text'],
+    ['citations', 'Citation graph', 'network'],
+    ['summary', 'Summary', 'summary'],
+    ['chat', 'Ask this case', 'chat'],
   ];
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <Link to="/" className="text-xs text-stone-500 hover:text-stone-800">
-        &larr; Back to search
+      <Link
+        to="/"
+        className="group flex w-fit items-center gap-1.5 text-xs text-stone-500
+                   transition-colors hover:text-maroon-700"
+      >
+        <Icon name="back" size={13} className="transition-transform group-hover:-translate-x-0.5" />
+        Back to search
       </Link>
 
       <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
@@ -66,7 +77,11 @@ export default function CasePage() {
       </div>
 
       {data.courtTier !== 'SC' && (
-        <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+        <p
+          className="mt-4 flex items-start gap-2 rounded-md border border-gold-200 bg-gold-50
+                     px-3 py-2 text-xs text-gold-700"
+        >
+          <Icon name="alert" size={14} className="mt-px" />
           This is not a Supreme Court decision. It does not bind other courts the way a Supreme
           Court judgment does.
         </p>
@@ -75,16 +90,18 @@ export default function CasePage() {
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_280px]">
         <div className="min-w-0">
           <div className="mb-5 flex gap-1 border-b border-stone-200">
-            {tabs.map(([id, label]) => (
+            {tabs.map(([id, label, icon]) => (
               <button
                 key={id}
                 onClick={() => setTab(id)}
-                className={`-mb-px border-b-2 px-3 py-2 text-sm ${
+                className={`-mb-px flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm
+                            transition-colors ${
                   effectiveTab === id
-                    ? 'border-stone-800 font-medium text-stone-900'
-                    : 'border-transparent text-stone-500 hover:text-stone-800'
+                    ? 'border-maroon-700 font-medium text-maroon-800'
+                    : 'border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-800'
                 }`}
               >
+                <Icon name={icon} size={15} />
                 {label}
               </button>
             ))}
@@ -99,18 +116,24 @@ export default function CasePage() {
 
         <aside className="space-y-6">
           <CitationBlock
+            icon="cites"
             heading="Cites"
             hint="Earlier cases this judgment relied on"
             items={data.citations.cites}
           />
           <CitationBlock
+            icon="citedBy"
             heading="Cited by"
             hint="Later cases in this corpus that cite it"
             items={data.citations.citedBy}
           />
 
           <div>
-            <h2 className="text-xs font-medium uppercase tracking-wide text-stone-400">
+            <h2
+              className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide
+                         text-stone-400"
+            >
+              <Icon name="quote" size={13} />
               What this text contains
             </h2>
             <ul className="mt-2 space-y-1 text-xs text-stone-600">
@@ -133,10 +156,12 @@ export default function CasePage() {
 }
 
 function CitationBlock({
+  icon,
   heading,
   hint,
   items,
 }: {
+  icon: IconName;
   heading: string;
   hint: string;
   items: Citation[];
@@ -144,7 +169,8 @@ function CitationBlock({
   if (!items.length) return null;
   return (
     <div>
-      <h2 className="text-xs font-medium uppercase tracking-wide text-stone-400">
+      <h2 className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-stone-400">
+        <Icon name={icon} size={13} className="text-terracotta-400" />
         {heading} ({items.length})
       </h2>
       <p className="mt-0.5 text-[11px] text-stone-400">{hint}</p>

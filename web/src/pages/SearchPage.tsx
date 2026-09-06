@@ -3,6 +3,9 @@ import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { searchCases, type CourtTier } from '../api';
 import { ContentBadge, TierBadge } from '../components/Badges';
+import CaseFileMark from '../components/CaseFileMark';
+import Icon from '../components/Icon';
+import { useDocumentTitle } from '../useDocumentTitle';
 
 const EXAMPLES = [
   'when can anticipatory bail be granted',
@@ -16,6 +19,8 @@ export default function SearchPage() {
   const q = params.get('q') ?? '';
   const tier = (params.get('courtTier') ?? '') as CourtTier | '';
   const [draft, setDraft] = useState(q);
+
+  useDocumentTitle(q ? `“${q}”` : null);
 
   const { data, isFetching, error } = useQuery({
     queryKey: ['search', q, tier],
@@ -33,7 +38,8 @@ export default function SearchPage() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
       {!q && (
-        <div className="mb-8">
+        <div className="mb-8 flex flex-col-reverse items-center gap-4 sm:flex-row sm:justify-between sm:gap-8">
+          <div>
           <h1 className="text-2xl font-semibold text-stone-900 tracking-tight">
             Search bail jurisprudence by meaning
           </h1>
@@ -42,6 +48,8 @@ export default function SearchPage() {
             similarity and exact term matching, so a question about financial crimes finds the
             right passage even when it never uses that phrase.
           </p>
+          </div>
+          <CaseFileMark className="w-44 shrink-0 sm:w-56" />
         </div>
       )}
 
@@ -52,17 +60,24 @@ export default function SearchPage() {
         }}
         className="flex gap-2"
       >
+        <div className="relative flex-1">
+        <Icon
+          name="search"
+          size={16}
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"
+        />
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="e.g. when is bail refused for economic offences"
-          className="flex-1 rounded-md border border-stone-300 bg-white px-4 py-2.5 text-sm
-                     outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
+          className="w-full rounded-md border border-stone-300 bg-white py-2.5 pl-10 pr-4 text-sm
+                     outline-none focus:border-maroon-400 focus:ring-2 focus:ring-maroon-100"
         />
+        </div>
         <button
           type="submit"
-          className="rounded-md bg-stone-900 px-5 py-2.5 text-sm font-medium text-white
-                     hover:bg-stone-700 disabled:opacity-50"
+          className="rounded-md bg-maroon-800 px-5 py-2.5 text-sm font-medium text-white transition-colors
+                     hover:bg-maroon-700 disabled:opacity-50"
           disabled={draft.trim().length < 2}
         >
           Search
@@ -77,7 +92,7 @@ export default function SearchPage() {
             onClick={() => submit(q || draft, v)}
             className={`rounded-full border px-2.5 py-1 ${
               tier === v
-                ? 'border-stone-800 bg-stone-800 text-white'
+                ? 'border-maroon-800 bg-maroon-800 text-white'
                 : 'border-stone-300 bg-white text-stone-600 hover:border-stone-400'
             }`}
           >
@@ -97,10 +112,18 @@ export default function SearchPage() {
                     setDraft(ex);
                     submit(ex);
                   }}
-                  className="text-sm text-stone-700 underline decoration-stone-300
-                             underline-offset-4 hover:decoration-stone-600"
+                  className="group flex items-center gap-2 text-sm text-stone-700
+                             transition-colors hover:text-maroon-700"
                 >
-                  {ex}
+                  <Icon
+                    name="chevronRight"
+                    size={13}
+                    className="text-gold-500 transition-transform group-hover:translate-x-0.5"
+                  />
+                  <span className="underline decoration-gold-300 underline-offset-4
+                                   group-hover:decoration-maroon-500">
+                    {ex}
+                  </span>
                 </button>
               </li>
             ))}
@@ -110,7 +133,7 @@ export default function SearchPage() {
 
       {isFetching && <p className="mt-8 text-sm text-stone-500">Searching&hellip;</p>}
       {error && (
-        <p className="mt-8 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+        <p className="mt-8 rounded-md border border-vermilion-200 bg-vermilion-50 p-3 text-sm text-vermilion-700">
           {(error as Error).message}
         </p>
       )}
@@ -122,7 +145,11 @@ export default function SearchPage() {
           </p>
           <ol className="mt-3 space-y-4">
             {data.results.map((r) => (
-              <li key={r.tid} className="rounded-lg border border-stone-200 bg-white p-4">
+              <li
+                key={r.tid}
+                className="rounded-lg border border-stone-200 bg-white p-4 transition-colors
+                           hover:border-terracotta-300"
+              >
                 <div className="flex items-start justify-between gap-4">
                   <Link
                     to={`/case/${r.tid}`}
@@ -134,21 +161,35 @@ export default function SearchPage() {
                 </div>
 
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
-                  <span>{r.year || 'undated'}</span>
+                  <span className="flex items-center gap-1">
+                    <Icon name="calendar" size={12} className="text-stone-400" />
+                    {r.year || 'undated'}
+                  </span>
                   {r.citedByCount > 0 && (
-                    <span title="How many other cases in this corpus cite it">
+                    <span
+                      title="How many other cases in this corpus cite it"
+                      className="flex items-center gap-1"
+                    >
+                      <Icon name="network" size={12} className="text-stone-400" />
                       cited by {r.citedByCount}
                     </span>
                   )}
-                  <span>{r.hasPdf ? 'official PDF' : 'text only'}</span>
+                  <span className="flex items-center gap-1">
+                    <Icon
+                      name={r.hasPdf ? 'document' : 'text'}
+                      size={12}
+                      className="text-stone-400"
+                    />
+                    {r.hasPdf ? 'official PDF' : 'text only'}
+                  </span>
                   {r.layer === 'seed' && (
-                    <span className="text-stone-400">landmark</span>
+                    <span className="rounded-sm bg-gold-100 px-1.5 py-0.5 text-gold-700">landmark</span>
                   )}
                 </div>
 
                 <ul className="mt-3 space-y-2">
                   {r.passages.map((p) => (
-                    <li key={p.id} className="border-l-2 border-stone-200 pl-3">
+                    <li key={p.id} className="border-l-2 border-gold-200 pl-3">
                       <div className="mb-1 flex items-center gap-2">
                         <ContentBadge type={p.contentType} />
                         {p.locator && <span className="text-[11px] text-stone-400">{p.locator}</span>}

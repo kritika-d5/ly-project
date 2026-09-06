@@ -58,8 +58,8 @@ export default function EgoGraph({ tid }: { tid: number }) {
     };
   }, [data, tid]);
 
-  if (isLoading) return <p className="text-sm text-slate-500">Building the citation graph&hellip;</p>;
-  if (error) return <p className="text-sm text-rose-700">{(error as Error).message}</p>;
+  if (isLoading) return <p className="text-sm text-stone-500">Building the citation graph&hellip;</p>;
+  if (error) return <p className="text-sm text-vermilion-700">{(error as Error).message}</p>;
   if (!annotated || !data) return null;
 
   const cites = annotated.nodes.filter((n) => n.role === 'authority').length;
@@ -78,37 +78,37 @@ export default function EgoGraph({ tid }: { tid: number }) {
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <p className="text-slate-500">
-          <span className="text-indigo-700">{cites} cases it cites</span>
+        <p className="text-stone-500">
+          <span className="text-navy-500">{cites} cases it cites</span>
           {' · '}
-          <span className="text-emerald-700">{citedBy} that cite it</span>
+          <span className="text-sage-600">{citedBy} that cite it</span>
           {interesting > 0 && (
             <>
               {' · '}
-              <span className="text-orange-700">
+              <span className="text-gold-600">
                 {interesting} not simply followed
               </span>
             </>
           )}
         </p>
         <div className="flex items-center gap-3">
-          <label className="flex items-center gap-1.5 text-slate-600">
+          <label className="flex items-center gap-1.5 text-stone-600">
             <input
               type="checkbox"
               checked={onlyDisagreement}
               onChange={(e) => setOnlyDisagreement(e.target.checked)}
-              className="accent-slate-800"
+              className="accent-maroon-700"
               disabled={interesting === 0}
             />
             Only disagreement
           </label>
-          <div className="flex overflow-hidden rounded border border-slate-300">
+          <div className="flex overflow-hidden rounded border border-stone-300">
             {([1, 2] as const).map((d) => (
               <button
                 key={d}
                 onClick={() => setDepth(d)}
                 className={`px-2 py-1 ${
-                  depth === d ? 'bg-slate-800 text-white' : 'bg-white text-slate-600'
+                  depth === d ? 'bg-maroon-800 text-white' : 'bg-white text-stone-600'
                 }`}
               >
                 {d === 1 ? 'Direct' : 'Two hops'}
@@ -124,14 +124,14 @@ export default function EgoGraph({ tid }: { tid: number }) {
         height={graphHeight}
         columns={depth === 1}
         highlightDisagreement={onlyDisagreement}
-        onNodeClick={(n) => {
+        onNodeOpen={(n) => {
           if (n.id !== tid) navigate(`/case/${n.id}`);
         }}
       />
 
       <GraphLegend className="mt-3" variant="ego" />
 
-      <p className="mt-3 text-[11px] text-slate-400">
+      <p className="mt-3 text-[11px] text-stone-400">
         Citation treatment is derived from Indian Kanoon&rsquo;s own annotations and has not been
         reviewed by a lawyer. &ldquo;Relied on&rdquo; means the case was referred to approvingly,
         not the technical &ldquo;followed&rdquo;.

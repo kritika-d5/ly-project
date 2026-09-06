@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
+import Icon from './Icon';
 
 // Vite resolves this to a hashed asset URL at build time; without it pdf.js
 // falls back to a CDN worker that the browser may block.
@@ -24,9 +25,12 @@ export default function PdfViewer({ url }: { url: string }) {
 
   if (failed) {
     return (
-      <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="flex items-start gap-2 rounded-md border border-gold-200 bg-gold-50 p-4 text-sm text-gold-700">
+        <Icon name="alert" size={16} className="mt-0.5" />
+        <span>
         Could not load the official PDF ({failed}). The full text is still available on the
         Text tab.
+        </span>
       </div>
     );
   }
@@ -38,8 +42,10 @@ export default function PdfViewer({ url }: { url: string }) {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="rounded border border-stone-300 bg-white px-2.5 py-1 disabled:opacity-40"
+            className="flex items-center gap-1 rounded border border-stone-300 bg-white px-2.5 py-1
+                       transition-colors hover:border-maroon-300 disabled:opacity-40"
           >
+            <Icon name="chevronLeft" size={14} />
             Previous
           </button>
           <span className="text-stone-600 tabular-nums">
@@ -48,17 +54,21 @@ export default function PdfViewer({ url }: { url: string }) {
           <button
             onClick={() => setPage((p) => Math.min(numPages, p + 1))}
             disabled={!numPages || page >= numPages}
-            className="rounded border border-stone-300 bg-white px-2.5 py-1 disabled:opacity-40"
+            className="flex items-center gap-1 rounded border border-stone-300 bg-white px-2.5 py-1
+                       transition-colors hover:border-maroon-300 disabled:opacity-40"
           >
             Next
+            <Icon name="chevronRight" size={14} />
           </button>
         </div>
         <a
           href={url}
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-stone-500 underline underline-offset-4 hover:text-stone-800"
+          className="flex items-center gap-1.5 text-xs text-stone-500 underline underline-offset-4
+                     hover:text-maroon-700"
         >
+          <Icon name="external" size={13} />
           Open original
         </a>
       </div>

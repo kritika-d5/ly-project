@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { streamChat, type ChatTurn, type Passage } from '../api';
 import { ContentBadge } from './Badges';
+import Icon from './Icon';
 
 interface Message extends ChatTurn {
   passages?: Passage[];
@@ -61,9 +62,11 @@ export default function ChatPanel({ tid, title }: { tid: number; title: string }
     <div className="flex flex-col">
       {messages.length === 0 && (
         <div className="rounded-lg border border-stone-200 bg-white p-4">
-          <p className="text-sm text-stone-700">
-            Ask about <span className="font-medium">{title}</span>. Answers come only from this
+          <p className="flex items-start gap-2 text-sm text-stone-700">
+            <Icon name="chat" size={16} className="mt-0.5 text-maroon-600" />
+            <span>Ask about <span className="font-medium">{title}</span>. Answers come only from this
             judgment&rsquo;s own text, with the passages used shown alongside.
+            </span>
           </p>
           <ul className="mt-3 space-y-1.5 text-sm">
             {[
@@ -74,8 +77,8 @@ export default function ChatPanel({ tid, title }: { tid: number; title: string }
               <li key={q}>
                 <button
                   onClick={() => setDraft(q)}
-                  className="text-stone-600 underline decoration-stone-300 underline-offset-4
-                             hover:decoration-stone-600"
+                  className="text-stone-600 underline decoration-gold-300 underline-offset-4
+                             hover:decoration-maroon-500"
                 >
                   {q}
                 </button>
@@ -89,7 +92,7 @@ export default function ChatPanel({ tid, title }: { tid: number; title: string }
         {messages.map((m, i) =>
           m.role === 'user' ? (
             <div key={i} className="flex justify-end">
-              <p className="max-w-[85%] rounded-lg bg-stone-800 px-3.5 py-2 text-sm text-white">
+              <p className="max-w-[85%] rounded-lg bg-maroon-800 px-3.5 py-2 text-sm text-white">
                 {m.content}
               </p>
             </div>
@@ -126,7 +129,7 @@ export default function ChatPanel({ tid, title }: { tid: number; title: string }
       </div>
 
       {error && (
-        <p className="mt-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+        <p className="mt-4 rounded-md border border-vermilion-200 bg-vermilion-50 p-3 text-sm text-vermilion-700">
           {error}
         </p>
       )}
@@ -138,15 +141,16 @@ export default function ChatPanel({ tid, title }: { tid: number; title: string }
           placeholder="Ask about this judgment…"
           disabled={busy}
           className="flex-1 rounded-md border border-stone-300 bg-white px-3.5 py-2.5 text-sm
-                     outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200
+                     outline-none focus:border-maroon-400 focus:ring-2 focus:ring-maroon-100
                      disabled:bg-stone-50"
         />
         <button
           type="submit"
           disabled={busy || !draft.trim()}
-          className="rounded-md bg-stone-900 px-4 py-2.5 text-sm font-medium text-white
-                     hover:bg-stone-700 disabled:opacity-40"
+          className="flex items-center gap-2 rounded-md bg-maroon-800 px-4 py-2.5 text-sm
+                     font-medium text-white transition-colors hover:bg-maroon-700 disabled:opacity-40"
         >
+          <Icon name="send" size={15} />
           {busy ? 'Answering…' : 'Ask'}
         </button>
       </form>

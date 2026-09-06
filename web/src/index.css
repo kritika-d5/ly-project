@@ -1,8 +1,97 @@
 @import 'tailwindcss';
 
+/**
+ * Palette — warm legal parchment.
+ *
+ * Drawn from the project's reference illustration: a cream ground, a deep
+ * maroon gavel, gold, briefcase terracotta, and one cool navy. Four rules keep
+ * it from turning into decoration:
+ *
+ *  1. `stone-*` is REDEFINED here as a warm brown-grey scale rather than
+ *     Tailwind's cool default. Every neutral in the app already used `stone-*`,
+ *     so retinting the scale warms the whole UI in one place instead of a
+ *     class-by-class rewrite. `stone-500` in this app is brown, not grey.
+ *  2. `maroon` is chrome only — buttons, active states, the wordmark. It is
+ *     dark and low-chroma, so it reads as near-black on a cream ground.
+ *  3. `vermilion` is data only — it is the one bright red in the system and it
+ *     is reserved for citation disagreement, where standing out is the point.
+ *     Keeping brand red dark and signal red bright is what stops the graph's
+ *     rare `neg` edges from being drowned out by the UI.
+ *  4. Citation treatment keeps the green/red convention lawyers already read
+ *     (approval / disapproval), but in `sage` and `vermilion` so it sits inside
+ *     the warm family rather than fighting it.
+ */
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+
+  /* Warm neutral — parchment through ink. Replaces Tailwind's cool stone. */
+  --color-stone-50: #faf5ef;
+  --color-stone-100: #f2e7dc;
+  --color-stone-200: #e6d5c6;
+  --color-stone-300: #d4bca8;
+  --color-stone-400: #b2977f;
+  --color-stone-500: #8c7361;
+  --color-stone-600: #6e594b;
+  --color-stone-700: #55433a;
+  --color-stone-800: #3b2c26;
+  --color-stone-900: #2b1a16;
+  --color-stone-950: #1c100d;
+
+  /* Maroon — the gavel. Primary chrome. */
+  --color-maroon-50: #fbf0ee;
+  --color-maroon-100: #f6dedb;
+  --color-maroon-200: #edbdb8;
+  --color-maroon-300: #de908a;
+  --color-maroon-400: #c85a54;
+  --color-maroon-500: #a8322e;
+  --color-maroon-600: #8e2320;
+  --color-maroon-700: #7a1f1c;
+  --color-maroon-800: #611918;
+  --color-maroon-900: #4a1413;
+
+  /* Gold — the hourglass. Emphasis, landmarks, warnings. */
+  --color-gold-50: #fdf7ea;
+  --color-gold-100: #f8ebcc;
+  --color-gold-200: #efd79e;
+  --color-gold-300: #e4c176;
+  --color-gold-400: #d9ae5f;
+  --color-gold-500: #c4923d;
+  --color-gold-600: #a0742c;
+  --color-gold-700: #7a5720;
+
+  /* Terracotta — the briefcase. Secondary, quiet accents. */
+  --color-terracotta-100: #f5e3d9;
+  --color-terracotta-200: #e9c8b4;
+  --color-terracotta-300: #d8a385;
+  --color-terracotta-400: #c07b5c;
+  --color-terracotta-500: #a3603f;
+  --color-terracotta-600: #83492e;
+
+  /* Navy — the bound volume. The one cool hue: authorities, "cites" direction. */
+  --color-navy-50: #ecf2f8;
+  --color-navy-100: #d3e1ef;
+  --color-navy-200: #a6c2dc;
+  --color-navy-300: #6e97be;
+  --color-navy-400: #3e6e9b;
+  --color-navy-500: #1d4e79;
+  --color-navy-600: #163d60;
+  --color-navy-700: #112e48;
+
+  /* Vermilion — signal red. Disagreement and errors only, never chrome. */
+  --color-vermilion-50: #fdeeed;
+  --color-vermilion-200: #f7c3bf;
+  --color-vermilion-400: #e8544c;
+  --color-vermilion-500: #d9272f;
+  --color-vermilion-600: #b81d24;
+  --color-vermilion-700: #94191f;
+
+  /* Sage — approval, warmed so it belongs to this palette. */
+  --color-sage-50: #f0f4ec;
+  --color-sage-200: #cbdac0;
+  --color-sage-500: #6d8a5c;
+  --color-sage-600: #55703f;
+  --color-sage-700: #435936;
 }
 
 html,
@@ -13,6 +102,11 @@ body,
 
 body {
   background: var(--color-stone-50);
+  color: var(--color-stone-900);
+}
+
+::selection {
+  background: var(--color-gold-200);
   color: var(--color-stone-900);
 }
 
