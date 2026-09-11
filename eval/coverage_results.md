@@ -216,7 +216,7 @@ exists for.
 
 **Regression check:** 0/10 should-work supporting rounds wrongly emptied.
 
-**Confirmed-gap behavior — mixed, and worth reporting precisely rather than rounding up:**
+**First attempt — confirmed-gap behavior, mixed:**
 
 | round | confirmed gaps correctly emptied |
 |---|---|
@@ -228,22 +228,40 @@ top 5 supporting items are Vaman Narain Ghiya (generic bail philosophy), Sushila
 Aggarwal (a s.437(3)/s.376 proviso passage), Prahlad Singh Bhati (a Chapter XXXIII bail
 overview), Sanjay Chandra (generic non-bailable-detention principle), and a TADA
 "disruptive activities" bail passage — **none mentions juveniles or the JJ Act**, yet
-the gate's LLM call judged at least one "relevant" and kept the round open. The gate's
-own prompt explicitly warns against exactly this ("generally bail-related is not
-enough"), but a candidate pool of 8 broad, all-genuinely-about-bail passages gives the
-model enough surface plausibility to find something arguably relevant even when nothing
-addresses the specific sub-question. The opposing/submissions pool is narrower and more
-argument-specific, which is almost certainly why the same gate is far more effective
-there (5/6 vs 1/6).
+the gate's LLM call judged at least one "relevant" and kept the round open, even though
+the prompt already warned against "generally bail-related is not enough". A candidate
+pool of 8 broad, all-genuinely-about-bail passages gave the model enough surface
+plausibility to find something arguably relevant even when nothing addressed the
+specific sub-question.
 
-**Net effect vs. no gate at all:** strictly better — it fully and correctly empties the
-clearest gap (PMLA) in every round, cleans up the opposing round substantially (5/6
-confirmed gaps, up from "always returns something"), and never wrongly empties a
-should-work round. It is not a complete fix for supporting-round noise on narrow,
-under-covered topics; that would need either a stricter prompt (e.g. requiring the
-model to quote which specific part of the passage addresses the sub-issue, mirroring
-Stage A's evidence-phrase discipline) or a smaller/filtered candidate pool. Not
-attempted here — flagging it as the natural next step rather than doing it unasked.
+**Refinement (one attempt, as agreed):** named the failure mode directly in the prompt —
+*"The test: would a lawyer researching THIS SPECIFIC question actually cite this
+passage? Answer no if the passage is about bail generally — or about some other bail
+topic entirely — but does not address the issue this question actually raises. A
+passage sharing vocabulary with the question (bail, custody, chargesheet, investigating
+agency) is not enough on its own; that vocabulary recurs throughout nearly every passage
+in this corpus regardless of topic."*
+
+Re-ran the 6 confirmed gaps only (no new queries):
+
+| round | confirmed gaps correctly emptied |
+|---|---|
+| supporting, refined prompt | **5/6** (up from 1/6 — only `sf02` juvenile bail still slips through) |
+
+Checked `sf02` again after the refinement: the top 5 supporting items are now Hassan Ali
+Khan (a PMLA facts passage), Mhetre (AB custody-concomitant principle), Prahlad Singh
+Bhati (Chapter XXXIII overview), Vaman Narain Ghiya (bail philosophy), and Antil (s.437
+exceptions) — again none about juveniles, and the gate still lets at least one through.
+**Documented weakness, shipped as-is per the one-attempt rule**: this corpus's court_text
+pool is broad enough, and generically bail-adjacent passages plausible enough, that an
+LLM relevance check on 5 candidates alone doesn't fully close every narrow gap — a
+stricter fix (e.g. requiring the model to quote which specific part of the passage
+addresses the sub-issue, mirroring Stage A's evidence-phrase discipline, or a
+smaller/filtered candidate pool) is the natural next step, not attempted here.
+
+**Net effect vs. no gate at all:** strictly better on every measured axis — 5/6 confirmed
+gaps correctly emptied in supporting (up from 1/6), 5/6 in opposing, PMLA fully closed in
+both, and 0/10 should-work rounds wrongly emptied. **Kept and committed.**
 
 ### 4. Cross-encoder reranker — implemented, measured, and it made ranking WORSE
 
@@ -308,3 +326,35 @@ compress the fact-pattern query to its legal issue before reranking, stripping t
 narrative vocabulary that seems to be driving the false matches, or (d) fine-tune on
 this corpus's own submissions/holdings pairs. None attempted here — this is a decision
 point, not something to silently iterate on further.
+
+**Decision: dropped.** `lib/rerank.ts` deleted, `roundSupporting` reverted to plain
+RRF top-8 (no widened pool, no cross-encoder call). This is a wrong-tool result with an
+identified mechanism, not a tuning failure — no alternative rerankers were tried, per
+instruction. The finding stays in this document as the record of what was tried and why
+it was rejected.
+
+---
+
+## Disposition (2026-09-11, end of day)
+
+| # | Decision | Status |
+|---|---|---|
+| 1 | classify() scope fix | **Kept, committed** (`49a052d`) |
+| 2 | Phase 5 recomputed on clean labels | Measurement only — no code |
+| 3 | Content-relevance gate, refined once | **Kept, committed** — 5/6 confirmed gaps (supporting), 5/6 (opposing), `sf02` documented as a residual weakness |
+| 4 | Cross-encoder reranker | **Dropped, `rerank.ts` deleted** — regression kept as a documented finding |
+
+**Final shipped numbers** (classify fix + refined gate, no reranker), confirmed across
+two independent full 20-query runs: **hit@1 5/10, hit@5 8/10, MRR 0.642.**
+
+One operational note from the final artifact-refresh run: partway through it, Groq's
+free-tier daily token cap (200k TPD, shared across today's `legal-rag-data` and
+`ly-project` work) was hit. The relevance gate's fail-open design handled this
+correctly — `[relevance] falling back to keep-all` in the server log, not a crash or a
+false empty — but it means that specific run's should-fail *empty flags* are not
+representative (everything fails open to "keep all" once the cap is hit). The
+authoritative 5/6 confirmed-gaps number above comes from a dedicated 6-query check that
+ran before the cap was reached; the should-work hit@1/hit@5/MRR numbers are unaffected
+(ranking depends only on RRF, not on the gate) and were confirmed identical across both
+runs. No further retrieval work is planned — see the top-level session note for why
+hit@5 8/10 on 198 judgments is being treated as sufficient for this prototype.
