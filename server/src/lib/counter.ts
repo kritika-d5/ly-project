@@ -50,6 +50,7 @@
 import { chunks, edges, nodes, paragraphs, VECTOR_INDEX } from '../config.js';
 import { classify } from './classify.js';
 import { embedQuery } from './embed.js';
+import { generateAnswer } from './generate.js';
 import { allIrrelevant } from './relevance.js';
 import { deriveTier, searchCases } from './search.js';
 import type {
@@ -287,6 +288,9 @@ export async function runCounter(req: CounterRequest): Promise<CounterResponseBo
         { round: 'opposing', items: [], empty: true },
         { round: 'statutes', items: [], empty: true },
       ],
+      answer: '',
+      generationFailed: false,
+      invalidCitations: [],
       tookMs: Date.now() - t0,
     };
   }
@@ -322,9 +326,20 @@ export async function runCounter(req: CounterRequest): Promise<CounterResponseBo
     gateRound(req.position, opposing),
   ]);
 
+  const finalRounds = [gatedSupporting, gatedOpposing, statutes];
+
+  // Stage F (CounterEngine.md §6/§8.2): synthesise the retrieved passages
+  // into an actual answer. Runs last, on whatever the gate left standing --
+  // an empty round here is not an error, it is honest input ("say so for
+  // that round, do not fill the gap").
+  const { markdown, generationFailed, invalidCitations } = await generateAnswer(req, cls, finalRounds);
+
   return {
     classification: cls,
-    rounds: [gatedSupporting, gatedOpposing, statutes],
+    rounds: finalRounds,
+    answer: markdown,
+    generationFailed,
+    invalidCitations,
     tookMs: Date.now() - t0,
   };
 }
