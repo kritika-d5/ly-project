@@ -25,6 +25,30 @@ export interface Passage {
   chunkKind: 'body' | 'headnote';
   score: number;
   via: ('vector' | 'text')[];
+  /** cosine similarity 0–1; null when only keyword search found it */
+  semanticScore?: number | null;
+  /** BM25 relative to this query's best keyword hit, 0–1; null when only vector search found it */
+  keywordScore?: number | null;
+  /** where query words occur in `text` */
+  highlights?: Span[];
+}
+
+/** Half-open character range [start, end) into a passage's text. */
+export interface Span {
+  start: number;
+  end: number;
+}
+
+export type MatchStrength = 'strong' | 'partial' | 'weak';
+
+export interface Explanation {
+  id: string;
+  /** null when the LLM was unavailable and a keyword-based reason is shown instead */
+  match: MatchStrength | null;
+  why: string;
+  /** the sentence behind the match, verified verbatim in the passage */
+  keySpan: Span | null;
+  source: 'llm' | 'fallback';
 }
 
 export interface CaseResult {
@@ -212,6 +236,20 @@ export function searchCases({ q, courtTier, contentTypes }: SearchParams) {
   if (courtTier) params.set('courtTier', courtTier);
   if (contentTypes?.length) params.set('contentTypes', contentTypes.join(','));
   return get<SearchResponse>(`/api/search?${params}`);
+}
+
+/** Server caps this at 10 ids per call. */
+export async function explainPassages(q: string, ids: string[]) {
+  const res = await fetch('/api/search/explain', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q, ids }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `explain failed (${res.status})`);
+  }
+  return res.json() as Promise<{ query: string; tookMs: number; explanations: Explanation[] }>;
 }
 
 export interface GraphNode {

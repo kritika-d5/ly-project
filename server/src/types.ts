@@ -103,9 +103,35 @@ export interface Passage {
   contentType: ContentType;
   sectionPrimary: string;
   chunkKind: 'body' | 'headnote';
+  /** RRF fused score — ordering only; its absolute value means nothing to a user */
   score: number;
   /** which retriever(s) found it — useful for debugging relevance */
   via: ('vector' | 'text')[];
+  /** raw cosine similarity from $vectorSearch (0–1); null when only BM25 found it */
+  semanticScore?: number | null;
+  /** BM25 score divided by the best BM25 hit for this query (0–1); null when only
+   *  the vector arm found it. Raw BM25 is not comparable across queries. */
+  keywordScore?: number | null;
+  /** character offsets in `text` where query terms occur */
+  highlights?: Span[];
+}
+
+/** Half-open character range [start, end) into a passage's text. */
+export interface Span {
+  start: number;
+  end: number;
+}
+
+/** Why a search result was returned (lib/explain.ts). */
+export interface Explanation {
+  id: string;
+  /** null when the LLM was unavailable and the fallback text is shown instead */
+  match: 'strong' | 'partial' | 'weak' | null;
+  why: string;
+  /** the sentence the model pointed at, located verbatim in the passage — or null
+   *  if the model's quote could not be found there (never trusted unverified) */
+  keySpan: Span | null;
+  source: 'llm' | 'fallback';
 }
 
 /* ------------------------------------------------------------------------ *
